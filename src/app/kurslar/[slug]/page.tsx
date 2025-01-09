@@ -8,9 +8,10 @@ interface PageParams {
   slug: string;
 }
 
+// generateMetadata fonksiyonunda async/await ve doğru türlerle çalışıyoruz
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const course = getCourseBySlug(params.slug);
-  
+  const course = await getCourseBySlug(params.slug);
+
   if (!course) {
     return {
       title: 'Kurs Bulunamadı',
@@ -23,16 +24,17 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
   };
 }
 
+// Static parametreleri oluştururken doğru yapı
 export async function generateStaticParams() {
-  const slugs = getAllCourseSlugs();
+  const slugs = await getAllCourseSlugs(); // getAllCourseSlugs'ın async olduğunu varsayıyoruz
   return slugs.map((slug: string) => ({
-    slug: slug,
+    slug,
   }));
 }
 
-export default async function Page({ params }: { params: Promise<PageParams> }) {
-  const resolvedParams = await params;
-  const course = getCourseBySlug(resolvedParams.slug);
+// Page bileşeninde doğru tür
+export default async function Page({ params }: { params: PageParams }) {
+  const course = await getCourseBySlug(params.slug);
 
   if (!course) {
     return (
@@ -46,4 +48,4 @@ export default async function Page({ params }: { params: Promise<PageParams> }) 
   }
 
   return <CourseDetails course={course} />;
-} 
+}
