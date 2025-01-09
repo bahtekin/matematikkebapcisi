@@ -1,37 +1,11 @@
 import { Metadata } from 'next';
-import { ResolvingMetadata } from 'next';
 import CourseDetails from '@/components/courses/CourseDetails';
-import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
+import { getCourseBySlug } from '@/lib/courses';
 
 type Props = {
   params: { slug: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
-
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const course = await getCourseBySlug(params.slug);
-
-  if (!course) {
-    return {
-      title: 'Kurs Bulunamadı',
-    };
-  }
-
-  return {
-    title: `${course.title} | Matematik Eğitim Platformu`,
-    description: course.description,
-  };
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllCourseSlugs();
-  return slugs.map((slug: string) => ({
-    slug,
-  }));
-}
 
 export default async function Page({ params }: Props) {
   const course = await getCourseBySlug(params.slug);
