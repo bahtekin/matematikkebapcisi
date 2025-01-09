@@ -2,11 +2,12 @@ import { Metadata } from 'next';
 import CourseDetails from '@/components/courses/CourseDetails';
 import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
 
-interface CoursePageProps {
+type CoursePageProps = {
   params: {
     slug: string;
   };
-}
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
 
 export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
   const course = getCourseBySlug(params.slug);
