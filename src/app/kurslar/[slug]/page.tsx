@@ -1,11 +1,9 @@
 import { Metadata } from 'next';
+import { PageProps } from '@/types/next';
 import CourseDetails from '@/components/courses/CourseDetails';
 import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
 
-type Props = {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+type Props = PageProps<{ slug: string }>;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const course = getCourseBySlug(params.slug);
@@ -29,7 +27,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function Page({ params }: Props) {
+export default async function Page({ params }: Props) {
   const course = getCourseBySlug(params.slug);
 
   if (!course) {
