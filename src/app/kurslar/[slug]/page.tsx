@@ -1,12 +1,16 @@
+'use client';
+
 import { Metadata } from 'next';
 import CourseDetails from '@/components/courses/CourseDetails';
 import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
 
-type PageParams = {
-  slug: string;
-};
+interface Props {
+  params: {
+    slug: string;
+  };
+}
 
-export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const course = getCourseBySlug(params.slug);
   
   if (!course) {
@@ -28,8 +32,8 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function Page({ params }: { params: PageParams }) {
-  const course = getCourseBySlug(params.slug);
+export default function Page(props: Props) {
+  const course = getCourseBySlug(props.params.slug);
 
   if (!course) {
     return (
