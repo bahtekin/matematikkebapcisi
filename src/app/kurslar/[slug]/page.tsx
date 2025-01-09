@@ -7,14 +7,13 @@ interface PageParams {
 }
 
 interface Props {
-  params: Promise<PageParams>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: PageParams;
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const resolvedParams = await params;
-    const course = await getCourseBySlug(resolvedParams.slug);
+    const course = await getCourseBySlug(params.slug);
 
     if (!course) {
       return {
@@ -43,8 +42,7 @@ export async function generateStaticParams() {
 
 export default async function Page({ params }: Props) {
   try {
-    const resolvedParams = await params;
-    const course = await getCourseBySlug(resolvedParams.slug);
+    const course = await getCourseBySlug(params.slug);
 
     if (!course) {
       return (
