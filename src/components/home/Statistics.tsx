@@ -7,7 +7,7 @@ const stats = [
     icon: Users,
     value: "50K+",
     label: "Aktif Öğrenci",
-    description: "Türkiye'nin dört bir yanından öğrenciler"
+    description: "Türkiye&apos;nin dört bir yanından öğrenciler"
   },
   {
     icon: BookOpen,

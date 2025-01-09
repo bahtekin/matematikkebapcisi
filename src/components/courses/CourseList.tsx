@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, Clock, Users, BookOpen } from 'lucide-react';
+import { Star, Clock, Users } from 'lucide-react';
 
 const allCourses = [
   {

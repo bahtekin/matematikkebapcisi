@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const Hero = () => {
-  const words = ["Eşitlik", "Hedefler", "Problem Çözme", "Gelecek", "Hayaller"];
+  const words = useMemo(() => ["Eşitlik", "Hedefler", "Problem Çözme", "Gelecek", "Hayaller"], []);
   const [displayText, setDisplayText] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);

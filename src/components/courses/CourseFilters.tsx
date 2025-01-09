@@ -23,11 +23,17 @@ const durations = [
   { id: '40+', name: '40+ Saat', count: 8 },
 ];
 
-interface CourseFiltersProps {
-  onFilterChange?: (filters: any) => void;
+interface FilterChangeHandler {
+  (filters: {
+    categories: string[];
+    levels: string[];
+    durations: string[];
+    priceRange: { min: string; max: string };
+    search?: string;
+  }): void;
 }
 
-const CourseFilters = ({ onFilterChange }: CourseFiltersProps) => {
+export default function CourseFilters({ onFilterChange }: { onFilterChange: FilterChangeHandler }) {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
@@ -225,6 +231,4 @@ const CourseFilters = ({ onFilterChange }: CourseFiltersProps) => {
       </div>
     </>
   );
-};
-
-export default CourseFilters; 
+} 

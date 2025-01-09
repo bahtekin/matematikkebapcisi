@@ -50,7 +50,7 @@ export default function SearchPage() {
           {searchQuery ? (
             <>
               <h2 className="text-2xl font-bold mb-8">
-                "{searchQuery}" için arama sonuçları
+                &ldquo;{searchQuery}&rdquo; için arama sonuçları
               </h2>
               <CourseList 
                 filters={{

@@ -2,33 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Moon, Sun, Menu, X, Search, User } from 'lucide-react';
 import Image from 'next/image';
 
-const Header = () => {
+export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const closeDropdown = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.profile-menu')) {
-        setIsProfileOpen(false);
-      }
-    };
-
-    document.addEventListener('click', closeDropdown);
-    return () => document.removeEventListener('click', closeDropdown);
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -37,6 +25,10 @@ const Header = () => {
       router.push(`/arama?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
+  };
+
+  const handleProfileClick = () => {
+    router.push('/profil');
   };
 
   const navigation = [
@@ -180,6 +172,4 @@ const Header = () => {
       )}
     </header>
   );
-};
-
-export default Header; 
+} 
