@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Urun {
+  id          Int      @id @default(autoincrement())
+  isim        String
+  aciklama    String
+  fiyat       Float
+  resimUrl    String?
+  kategori    String
+  stok        Int      @default(0)
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+  siparisler  SiparisDetay[]
+}
+
+model Musteri {
+  id          Int       @id @default(autoincrement())
+  ad          String
+  soyad       String
+  email       String    @unique
+  telefon     String?
+  adres       String?
+  siparisler  Siparis[]
+  olusturuldu DateTime  @default(now())
+  guncellendi DateTime  @updatedAt
+}
+
+model Siparis {
+  id            Int            @id @default(autoincrement())
+  musteriId     Int
+  musteri       Musteri        @relation(fields: [musteriId], references: [id])
+  toplamFiyat   Float
+  durum         String         @default("beklemede") // beklemede, hazirlaniyor, yolda, tamamlandi
+  siparisDetay  SiparisDetay[]
+  olusturuldu   DateTime       @default(now())
+  guncellendi   DateTime       @updatedAt
+}
+
+model SiparisDetay {
+  id        Int      @id @default(autoincrement())
+  siparisId Int
+  siparis   Siparis  @relation(fields: [siparisId], references: [id])
+  urunId    Int
+  urun      Urun     @relation(fields: [urunId], references: [id])
+  miktar    Int
+  fiyat     Float
+}
