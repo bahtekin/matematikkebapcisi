@@ -2,14 +2,11 @@ import { Metadata } from 'next';
 import CourseDetails from '@/components/courses/CourseDetails';
 import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
 
-type CoursePageProps = {
-  params: {
-    slug: string;
-  };
-  searchParams?: { [key: string]: string | string[] | undefined };
-};
+interface PageProps {
+  params: { slug: string };
+}
 
-export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const course = getCourseBySlug(params.slug);
   
   if (!course) {
@@ -31,7 +28,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function CoursePage({ params }: CoursePageProps) {
+export default async function Page({ params }: PageProps) {
   const course = getCourseBySlug(params.slug);
 
   if (!course) {
