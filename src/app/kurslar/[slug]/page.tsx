@@ -4,13 +4,11 @@ import { Metadata } from 'next';
 import CourseDetails from '@/components/courses/CourseDetails';
 import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
 
-interface Props {
-  params: {
-    slug: string;
-  };
+interface PageParams {
+  slug: string;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
   const course = getCourseBySlug(params.slug);
   
   if (!course) {
@@ -32,8 +30,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function Page(props: Props) {
-  const course = getCourseBySlug(props.params.slug);
+export default async function Page({ params }: { params: Promise<PageParams> }) {
+  const resolvedParams = await params;
+  const course = getCourseBySlug(resolvedParams.slug);
 
   if (!course) {
     return (
