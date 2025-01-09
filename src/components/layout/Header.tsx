@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Moon, Sun, Menu, X, Search, User } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Header() {
   const router = useRouter();
-  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,10 +24,6 @@ export default function Header() {
       router.push(`/arama?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
-  };
-
-  const handleProfileClick = () => {
-    router.push('/profil');
   };
 
   const navigation = [

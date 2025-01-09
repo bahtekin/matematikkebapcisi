@@ -38,7 +38,7 @@ const Statistics = () => {
             Rakamlarla Matematik Kebapçısı
           </h2>
           <p className="text-lg text-muted-foreground">
-            Türkiye'nin en büyük online matematik eğitim platformu
+            Türkiye&apos;nin en büyük online matematik eğitim platformu
           </p>
         </div>
         
