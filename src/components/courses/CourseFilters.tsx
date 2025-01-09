@@ -23,32 +23,37 @@ const durations = [
   { id: '40+', name: '40+ Saat', count: 8 },
 ];
 
-interface FilterChangeHandler {
-  (filters: {
-    categories: string[];
-    levels: string[];
-    durations: string[];
-    priceRange: { min: string; max: string };
-    search?: string;
-  }): void;
+interface Filters {
+  search: string;
+  categories: string[];
+  levels: string[];
+  durations: string[];
+  priceRange: {
+    min: string;
+    max: string;
+  };
 }
 
-export default function CourseFilters({ onFilterChange }: { onFilterChange: FilterChangeHandler }) {
+interface CourseFiltersProps {
+  onFilterChange: (filters: Filters) => void;
+}
+
+export default function CourseFilters({ onFilterChange }: CourseFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
     search: '',
-    categories: [] as string[],
-    levels: [] as string[],
-    durations: [] as string[],
+    categories: [],
+    levels: [],
+    durations: [],
     priceRange: {
       min: '',
       max: ''
     }
   });
 
-  const handleFilterChange = (newFilters: typeof filters) => {
+  const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters);
-    onFilterChange?.(newFilters);
+    onFilterChange(newFilters);
   };
 
   const handleCategoryChange = (categoryId: string) => {

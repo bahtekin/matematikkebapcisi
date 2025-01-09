@@ -4,8 +4,19 @@ import { useState } from 'react';
 import CourseList from '../../components/courses/CourseList';
 import CourseFilters from '../../components/courses/CourseFilters';
 
+interface Filters {
+  search: string;
+  categories: string[];
+  levels: string[];
+  durations: string[];
+  priceRange: {
+    min: string;
+    max: string;
+  };
+}
+
 export default function CoursesPage() {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Filters>({
     search: '',
     categories: [],
     levels: [],
@@ -15,6 +26,10 @@ export default function CoursesPage() {
       max: ''
     }
   });
+
+  const handleFilterChange = (newFilters: Filters) => {
+    setFilters(newFilters);
+  };
 
   return (
     <main className="flex min-h-screen flex-col">
@@ -37,7 +52,7 @@ export default function CoursesPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filtreler */}
           <aside className="w-full lg:w-72">
-            <CourseFilters onFilterChange={setFilters} />
+            <CourseFilters onFilterChange={handleFilterChange} />
           </aside>
 
           {/* Kurs Listesi */}
