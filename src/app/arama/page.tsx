@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import CourseList from '@/components/courses/CourseList';
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const [searchQuery, setSearchQuery] = useState(query);
@@ -15,7 +15,7 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <main className="min-h-screen">
+    <>
       {/* Hero Section */}
       <div className="bg-accent/50">
         <div className="container px-4 md:px-6 py-16">
@@ -71,6 +71,24 @@ export default function SearchPage() {
           )}
         </div>
       </div>
+    </>
+  );
+}
+
+function SearchLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+    </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <main className="min-h-screen">
+      <Suspense fallback={<SearchLoading />}>
+        <SearchContent />
+      </Suspense>
     </main>
   );
 } 
