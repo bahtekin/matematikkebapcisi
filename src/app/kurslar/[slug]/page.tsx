@@ -6,8 +6,9 @@ interface PageParams {
   slug: string;
 }
 
-export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
-  const course = await getCourseBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<PageParams> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const course = await getCourseBySlug(resolvedParams.slug);
 
   if (!course) {
     return {
@@ -28,8 +29,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function Page({ params }: { params: PageParams }) {
-  const course = await getCourseBySlug(params.slug);
+export default async function Page({ params }: { params: Promise<PageParams> }) {
+  const resolvedParams = await params;
+  const course = await getCourseBySlug(resolvedParams.slug);
 
   if (!course) {
     return (
