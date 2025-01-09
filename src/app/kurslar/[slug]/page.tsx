@@ -1,5 +1,3 @@
-'use client';
-
 import { Metadata } from 'next';
 import CourseDetails from '@/components/courses/CourseDetails';
 import { getCourseBySlug, getAllCourseSlugs } from '@/lib/courses';
@@ -8,7 +6,6 @@ interface PageParams {
   slug: string;
 }
 
-// generateMetadata fonksiyonunda async/await ve doğru türlerle çalışıyoruz
 export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
   const course = await getCourseBySlug(params.slug);
 
@@ -24,15 +21,13 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
   };
 }
 
-// Static parametreleri oluştururken doğru yapı
 export async function generateStaticParams() {
-  const slugs = await getAllCourseSlugs(); // getAllCourseSlugs'ın async olduğunu varsayıyoruz
+  const slugs = await getAllCourseSlugs();
   return slugs.map((slug: string) => ({
     slug,
   }));
 }
 
-// Page bileşeninde doğru tür
 export default async function Page({ params }: { params: PageParams }) {
   const course = await getCourseBySlug(params.slug);
 
