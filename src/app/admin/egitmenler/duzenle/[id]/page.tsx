@@ -1,18 +1,19 @@
 import { PrismaClient } from '@prisma/client';
 import EgitmenForm from '../../components/EgitmenForm';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 
 const prisma = new PrismaClient();
 
-interface EgitmenDuzenlePageProps {
-  params: {
-    id: string;
-  };
-}
+export const metadata: Metadata = {
+  title: 'Eğitmen Düzenle',
+};
 
 export default async function EgitmenDuzenlePage({
   params,
-}: EgitmenDuzenlePageProps) {
+}: {
+  params: { id: string };
+}) {
   // ID'yi kontrol et ve sayıya çevir
   const egitmenId = parseInt(params.id, 10);
 
