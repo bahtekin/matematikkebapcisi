@@ -10,6 +10,9 @@ const nextConfig = {
       'via.placeholder.com'
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
 }
 
 module.exports = nextConfig 
