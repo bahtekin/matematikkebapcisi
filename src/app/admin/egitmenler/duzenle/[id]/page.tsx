@@ -1,20 +1,16 @@
 import { PrismaClient } from '@prisma/client'
 import EgitmenForm from '../../components/EgitmenForm'
-import { Metadata } from 'next'
 
 const prisma = new PrismaClient()
 
-type Props = {
-  params: { id: string }
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return {
-    title: 'Eğitmen Düzenle'
+interface PageProps {
+  params: {
+    id: string
   }
+  searchParams?: { [key: string]: string | string[] | undefined }
 }
 
-export default async function EgitmenDuzenlePage({ params }: Props) {
+export default async function EgitmenDuzenlePage({ params }: PageProps) {
   const egitmen = await prisma.user.findUnique({
     where: { id: parseInt(params.id) },
     select: {
@@ -45,4 +41,4 @@ export default async function EgitmenDuzenlePage({ params }: Props) {
       </div>
     </div>
   )
-} 
+}
