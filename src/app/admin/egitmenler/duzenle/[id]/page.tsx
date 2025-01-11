@@ -3,17 +3,26 @@ import EgitmenForm from '../../components/EgitmenForm';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
-const prisma = new PrismaClient();
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+const prisma = globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export const metadata: Metadata = {
   title: 'Eğitmen Düzenle',
 };
 
-export default async function EgitmenDuzenlePage({
-  params,
-}: {
-  params: { id: string };
-}) {
+type Props = {
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export default async function EgitmenDuzenlePage({ params }: Props) {
   // ID'yi kontrol et ve sayıya çevir
   const egitmenId = parseInt(params.id, 10);
 
