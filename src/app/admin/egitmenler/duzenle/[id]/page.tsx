@@ -3,12 +3,16 @@ import EgitmenForm from '../../components/EgitmenForm'
 
 const prisma = new PrismaClient()
 
-type PageProps = {
-  params: { id: string }
-  searchParams?: { [key: string]: string | string[] | undefined }
+interface PageParams {
+  id: string;
 }
 
-export default async function EgitmenDuzenlePage({ params }: PageProps) {
+interface Props {
+  params: PageParams;
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default async function EgitmenDuzenlePage({ params }: Props) {
   const egitmen = await prisma.user.findUnique({
     where: { id: parseInt(params.id) },
     select: {
