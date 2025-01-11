@@ -3,13 +3,11 @@ import EgitmenForm from '../../components/EgitmenForm'
 
 const prisma = new PrismaClient()
 
-interface PageParams {
-  id: string;
-}
-
-interface Props {
-  params: PageParams;
-  searchParams: { [key: string]: string | string[] | undefined };
+type Props = {
+  params: {
+    id: string
+  }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export default async function EgitmenDuzenlePage({ params }: Props) {
