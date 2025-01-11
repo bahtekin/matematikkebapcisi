@@ -1,11 +1,13 @@
+import { Metadata } from 'next'
 import prisma from '@/lib/prisma'
 import KursForm from '../../components/KursForm'
 import { notFound } from 'next/navigation'
 
-interface Props {
+type Props = {
   params: {
     id: string
   }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 async function getFormData(id: string) {

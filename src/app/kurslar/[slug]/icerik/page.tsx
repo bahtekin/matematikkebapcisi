@@ -8,14 +8,16 @@ import Plyr from 'plyr-react';
 import 'plyr-react/plyr.css';
 import { use } from 'react';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { Metadata } from 'next'
 
-interface Props {
+type Props = {
   params: {
     slug: string
   }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default function KursIcerik({ params }: Props) {
+export default function KursIcerik({ params, searchParams }: Props) {
   const [kurs, setKurs] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

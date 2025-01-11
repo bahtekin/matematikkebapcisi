@@ -10,11 +10,13 @@ import { use } from 'react'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import Plyr from 'plyr-react'
 import 'plyr-react/plyr.css'
+import { Metadata } from 'next'
 
-interface Props {
-  params: Promise<{
+type Props = {
+  params: {
     slug: string
-  }>
+  }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 interface KursWithRelations {
@@ -88,7 +90,7 @@ function calculateTotalDuration(curriculum: Array<{ title: string; items: Array<
   return { hours: totalHours, minutes: totalMinutes };
 }
 
-export default function KursDetay({ params }: Props) {
+export default function KursDetay({ params, searchParams }: Props) {
   const resolvedParams = use(params)
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'info' | 'curriculum' | 'reviews' | 'announcements'>('info')
