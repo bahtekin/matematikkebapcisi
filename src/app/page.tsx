@@ -2,8 +2,9 @@ import Hero from '../components/home/Hero';
 import Features from '../components/home/Features';
 import PopularCourses from '../components/home/PopularCourses';
 import Testimonials from '../components/home/Testimonials';
-import Statistics from '../components/home/Statistics';
 import CTASection from '../components/home/CTASection';
+import BrowseCategories from '@/components/home/BrowseCategories';
+import AboutUs from '@/components/home/AboutUs';
 
 export default function Home() {
   return (
@@ -11,7 +12,8 @@ export default function Home() {
       <Hero />
       <Features />
       <PopularCourses />
-      <Statistics />
+      <BrowseCategories />
+      <AboutUs />
       <Testimonials />
       <CTASection />
     </main>

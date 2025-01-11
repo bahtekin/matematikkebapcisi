@@ -19,10 +19,47 @@ export default function RegisterPage() {
     terms: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Kayıt işlemleri burada yapılacak
-    console.log(formData);
+
+    if (formData.password !== formData.passwordConfirm) {
+      alert('Şifreler eşleşmiyor!');
+      return;
+    }
+
+    if (!formData.terms) {
+      alert('Kullanım şartlarını ve gizlilik politikasını kabul etmelisiniz!');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/ogrenciler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          grade: formData.grade,
+          examType: formData.examType,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Kayıt sırasında bir hata oluştu');
+      }
+
+      alert('Kayıt başarılı! Giriş yapabilirsiniz.');
+      window.location.href = '/giris';
+    } catch (error) {
+      console.error('Kayıt hatası:', error);
+      alert(error instanceof Error ? error.message : 'Kayıt sırasında bir hata oluştu');
+    }
   };
 
   const grades = [

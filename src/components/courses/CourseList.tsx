@@ -1,76 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Star, Clock, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertCircle } from 'lucide-react';
+import CourseCard from './CourseCard';
 
-const allCourses = [
-  {
-    id: 1,
-    slug: 'tyt-matematik-sifirdan-zirveye',
-    title: "TYT Matematik Sıfırdan Zirveye",
-    instructor: "Dr. Ahmet Yılmaz",
-    rating: 4.9,
-    students: 1234,
-    duration: "40 saat",
-    lessons: 120,
-    image: "/courses/tyt-mat.png",
-    price: "₺299",
-    tag: "tyt",
-    level: "beginner",
-    description: "TYT matematikte sıfırdan zirveye çıkmanızı sağlayacak kapsamlı eğitim serisi."
-  },
-  {
-    id: 2,
-    slug: 'ayt-matematik-geometri-kampi',
-    title: "AYT Matematik Geometri Kampı",
-    instructor: "Ayşe Demir",
-    rating: 4.8,
-    students: 856,
-    duration: "35 saat",
-    lessons: 90,
-    image: "/courses/tyt-mat.png",
-    price: "₺349",
-    tag: "ayt",
-    level: "advanced",
-    description: "AYT geometri konularını derinlemesine öğrenin, zor soruları kolayca çözün."
-  },
-  {
-    id: 3,
-    slug: 'lgs-matematik-soru-bankasi-cozumleri',
-    title: "LGS Matematik Soru Bankası Çözümleri",
-    instructor: "Mehmet Kaya",
-    rating: 4.9,
-    students: 2156,
-    duration: "28 saat",
-    lessons: 75,
-    image: "/courses/tyt-mat.png",
-    price: "₺249",
-    tag: "lgs",
-    level: "intermediate",
-    description: "LGS matematik sorularını çözme teknikleriyle birlikte öğrenin."
-  },
-  {
-    id: 4,
-    slug: 'tyt-ayt-trigonometri-ozel-ders',
-    title: "TYT-AYT Trigonometri Özel Ders",
-    instructor: "Zeynep Şahin",
-    rating: 4.7,
-    students: 943,
-    duration: "25 saat",
-    lessons: 60,
-    image: "/courses/tyt-mat.png",
-    price: "₺399",
-    tag: "tyt-ayt",
-    level: "advanced",
-    description: "Trigonometri konularını özel ders kalitesinde öğrenin."
-  },
-  // Daha fazla kurs eklenebilir
-];
+interface Course {
+  id: number;
+  baslik: string;
+  slug: string;
+  aciklama: string;
+  fiyat: number;
+  resimUrl: string | null;
+  kategori: {
+    isim: string;
+  };
+  ogretmen: {
+    ad: string;
+    soyad: string;
+  };
+  _count: {
+    dersler: number;
+    kayitlar: number;
+  };
+}
 
 interface CourseListProps {
-  filters?: {
+  filters: {
     search: string;
     categories: string[];
     levels: string[];
@@ -82,67 +37,103 @@ interface CourseListProps {
   };
 }
 
-const CourseList = ({ filters }: CourseListProps) => {
-  const [filteredCourses, setFilteredCourses] = useState(allCourses);
+export default function CourseList({ filters }: CourseListProps) {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
-    if (!filters) {
-      setFilteredCourses(allCourses);
-      return;
-    }
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch('/api/kurslar');
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Kurslar yüklenirken bir hata oluştu');
+        }
+        
+        const data = await response.json();
+        setCourses(data);
+      } catch (error) {
+        console.error('Kurslar yüklenirken hata:', error);
+        setError(error instanceof Error ? error.message : 'Kurslar yüklenirken bir hata oluştu');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    let result = [...allCourses];
+    fetchCourses();
+  }, []);
 
+  // Filtreleme işlemleri
+  const filteredCourses = courses.filter(course => {
     // Arama filtresi
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      result = result.filter(course => 
-        course.title.toLowerCase().includes(searchLower) ||
-        course.description.toLowerCase().includes(searchLower) ||
-        course.instructor.toLowerCase().includes(searchLower)
-      );
+    if (filters.search && !course.baslik.toLowerCase().includes(filters.search.toLowerCase())) {
+      return false;
     }
 
     // Kategori filtresi
-    if (filters.categories.length > 0) {
-      result = result.filter(course => filters.categories.includes(course.tag));
-    }
-
-    // Seviye filtresi
-    if (filters.levels.length > 0) {
-      result = result.filter(course => filters.levels.includes(course.level));
-    }
-
-    // Süre filtresi
-    if (filters.durations.length > 0) {
-      result = result.filter(course => {
-        const duration = parseInt(course.duration);
-        return filters.durations.some(range => {
-          if (range === '40+') return duration >= 40;
-          const [min, max] = range.split('-').map(Number);
-          return duration >= min && duration < max;
-        });
-      });
+    if (filters.categories.length > 0 && !filters.categories.includes(course.kategori.isim)) {
+      return false;
     }
 
     // Fiyat aralığı filtresi
-    if (filters.priceRange.min || filters.priceRange.max) {
-      result = result.filter(course => {
-        const price = parseInt(course.price.replace('₺', ''));
-        const min = filters.priceRange.min ? parseInt(filters.priceRange.min) : 0;
-        const max = filters.priceRange.max ? parseInt(filters.priceRange.max) : Infinity;
-        return price >= min && price <= max;
-      });
+    if (filters.priceRange.min && course.fiyat < parseFloat(filters.priceRange.min)) {
+      return false;
+    }
+    if (filters.priceRange.max && course.fiyat > parseFloat(filters.priceRange.max)) {
+      return false;
     }
 
-    setFilteredCourses(result);
-  }, [filters]);
+    return true;
+  });
+
+  // Sıralama işlemi
+  const sortedCourses = [...filteredCourses].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-asc':
+        return a.fiyat - b.fiyat;
+      case 'price-desc':
+        return b.fiyat - a.fiyat;
+      case 'lessons':
+        return b._count.dersler - a._count.dersler;
+      default:
+        return 0;
+    }
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-4">
+        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Bir Hata Oluştu</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Tekrar Dene
+        </button>
+      </div>
+    );
+  }
 
   if (filteredCourses.length === 0) {
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-semibold mb-2">Kurs Bulunamadı</h3>
-        <p className="text-muted-foreground">
+        <p className="text-gray-600 dark:text-gray-400">
           Arama kriterlerinize uygun kurs bulunamadı. Lütfen filtrelerinizi değiştirin.
         </p>
       </div>
@@ -151,70 +142,35 @@ const CourseList = ({ filters }: CourseListProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <p className="text-muted-foreground">
-          {filteredCourses.length} kurs bulundu
-        </p>
-        <select className="bg-background border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-          <option value="popular">Popülerlik</option>
-          <option value="price-asc">Fiyat (Artan)</option>
-          <option value="price-desc">Fiyat (Azalan)</option>
-          <option value="rating">Puan</option>
-        </select>
+      {/* Üst Kısım */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+          <input
+            type="text"
+            placeholder="Kurs ara..."
+            value={filters.search}
+            onChange={(e) => filters.search = e.target.value}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="newest">Sırala: En Yeni</option>
+            <option value="price-asc">Fiyat (Düşükten Yükseğe)</option>
+            <option value="price-desc">Fiyat (Yüksekten Düşüğe)</option>
+            <option value="lessons">En Çok Ders</option>
+          </select>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredCourses.map((course) => (
-          <Link 
-            href={`/kurslar/${course.slug}`}
-            key={course.id}
-            className="group bg-background rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full"
-          >
-            <div className="relative h-48">
-              <div className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full text-sm font-medium bg-primary/90 text-primary-foreground">
-                {course.tag.toUpperCase()}
-              </div>
-              <Image
-                src={course.image}
-                alt={course.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-200"
-              />
-            </div>
-            
-            <div className="p-5">
-              <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                {course.title}
-              </h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                {course.instructor}
-              </p>
-              
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {course.duration}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {course.students}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  {course.rating}
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-lg">{course.price}</span>
-                <span className="text-sm text-primary font-medium">Detaylar →</span>
-              </div>
-            </div>
-          </Link>
+      {/* Kurs Listesi */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {sortedCourses.map((course) => (
+          <CourseCard key={course.id} course={course} />
         ))}
       </div>
     </div>
   );
-};
-
-export default CourseList; 
+}

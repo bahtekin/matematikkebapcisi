@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    // Warning: Bu sadece geliştirme aşamasında geçici olarak devre dışı bırakılmıştır
-    ignoreDuringBuilds: true,
+  images: {
+    domains: [
+      'i.ytimg.com', 
+      'img.youtube.com', 
+      'youtube.com',
+      'res.cloudinary.com',
+      'localhost',
+      'via.placeholder.com'
+    ],
   },
-  typescript: {
-    // Warning: Bu sadece geliştirme aşamasında geçici olarak devre dışı bırakılmıştır
-    ignoreBuildErrors: true,
-  }
 }
 
 module.exports = nextConfig 

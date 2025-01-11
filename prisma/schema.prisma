@@ -60,3 +60,140 @@ model SiparisDetay {
   miktar    Int
   fiyat     Float
 }
+
+// Kullanıcı Rolleri için enum
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  sifre         String
+  ad            String
+  soyad         String
+  rol           Role      @default(STUDENT)
+  telefon       String?
+  adres         String?
+  resimUrl      String?   // Profil resmi URL'i
+  biyografi     String?   // Eğitmen biyografisi
+  olusturuldu   DateTime  @default(now())
+  guncellendi   DateTime  @updatedAt
+  kursKayitlari KursKayit[]
+  ogretmenKurslari Kurs[] @relation("OgretmenKurslari")
+  blogYazilari  Blog[]    @relation("YazarBlog")
+}
+
+model Kurs {
+  id           Int      @id @default(autoincrement())
+  baslik      String
+  slug        String   @unique
+  aciklama    String   @db.Text
+  fiyat       Float
+  resimUrl    String?
+  tag         String?
+  duration    String?
+  rating      Float    @default(5.0)
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+
+  // İlişkiler
+  kategori    Kategori @relation(fields: [kategoriId], references: [id])
+  kategoriId  Int
+  ogretmen    User     @relation("OgretmenKurslari", fields: [ogretmenId], references: [id])
+  ogretmenId  Int
+  dersler     Ders[]
+  kayitlar    KursKayit[]
+
+  // JSON alanları
+  whatYouWillLearn Json?    @default("[]") // string[]
+  requirements     Json?    @default("[]") // string[]
+  curriculum       Json?    @default("[]") // Array<{ title: string, items: Array<{ title: string, duration: string, type: string, isLocked: boolean, videoUrl?: string }> }>
+  
+  // Yeni alanlar
+  videoUrl        String?
+  kaynaklar       Json?    @default("[]")
+
+  @@map("kurslar")
+}
+
+model Kategori {
+  id          Int      @id @default(autoincrement())
+  isim        String
+  aciklama    String?
+  kurslar     Kurs[]
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+}
+
+model KursKayit {
+  id          Int      @id @default(autoincrement())
+  kursId      Int
+  kurs        Kurs     @relation(fields: [kursId], references: [id])
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  durum       String   @default("aktif") // aktif, tamamlandi, iptal
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+}
+
+model Ders {
+  id          Int      @id @default(autoincrement())
+  baslik      String
+  icerik      String
+  videoUrl    String?
+  sure        Int      // dakika cinsinden
+  kursId      Int
+  kurs        Kurs     @relation(fields: [kursId], references: [id])
+  sira        Int      // dersin sırası
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+}
+
+model Ayarlar {
+  id          Int      @id @default(autoincrement())
+  anahtar     String   @unique
+  deger       String
+  aciklama    String?
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+}
+
+model Blog {
+  id          Int      @id @default(autoincrement())
+  baslik      String
+  icerik      String
+  resimUrl    String?
+  yazarId     Int
+  yazar       User     @relation("YazarBlog", fields: [yazarId], references: [id])
+  etiketler   String?
+  olusturuldu DateTime @default(now())
+  guncellendi DateTime @updatedAt
+}
+
+model Student {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phone       String
+  grade       String
+  examType    String
+  password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id              String   @id @default(cuid())
+  siteName        String
+  siteDescription String
+  contactEmail    String
+  phoneNumber     String?
+  address         String?
+  socialMedia     Json
+  smtp            Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

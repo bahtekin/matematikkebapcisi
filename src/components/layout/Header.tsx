@@ -2,21 +2,70 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Moon, Sun, Menu, X, Search, User } from 'lucide-react';
+import { Moon, Sun, Menu, X, Search, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [user, setUser] = useState<any>(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  // Admin sayfasında ise header'ı gösterme
+  if (pathname?.includes('/admin')) {
+    return null;
+  }
 
   useEffect(() => {
     setMounted(true);
+    // Kullanıcı bilgilerini localStorage'dan al
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
+    // Storage event listener ekle
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user') {
+        if (e.newValue) {
+          setUser(JSON.parse(e.newValue));
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    // userChange event listener ekle
+    const handleUserChange = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('userChange', handleUserChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userChange', handleUserChange);
+    };
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    router.push('/');
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +84,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 xl:px-32 max-w-[1400px] flex h-16 items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
@@ -99,12 +148,67 @@ export default function Header() {
 
           {/* Profil Menü */}
           <div className="relative profile-menu">
-            <Link
-              href="/giris"
-              className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              <User className="h-5 w-5" />
-            </Link>
+            {user ? (
+              <>
+                <button
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                </button>
+                
+                {/* Profil Dropdown Menü */}
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-background border">
+                    <div className="py-1">
+                      <div className="px-4 py-2 text-sm border-b">
+                        <div className="font-medium">{user.ad} {user.soyad}</div>
+                        <div className="text-muted-foreground">{user.email}</div>
+                      </div>
+                      <Link
+                        href="/profil"
+                        className="block px-4 py-2 text-sm hover:bg-accent"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        Profilim
+                      </Link>
+                      {user.rol === 'ADMIN' && (
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2 text-sm hover:bg-accent"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          Admin Paneli
+                        </Link>
+                      )}
+                      {user.rol === 'TEACHER' && (
+                        <Link
+                          href="/egitmen"
+                          className="block px-4 py-2 text-sm hover:bg-accent"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          Eğitmen Paneli
+                        </Link>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-accent flex items-center space-x-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Çıkış Yap</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                href="/giris"
+                className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <User className="h-5 w-5" />
+              </Link>
+            )}
           </div>
 
           {/* Mobil Menü Butonu */}
@@ -154,13 +258,50 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-              <Link
-                href="/giris"
-                className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Giriş Yap
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/profil"
+                    className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Profilim
+                  </Link>
+                  {user.rol === 'ADMIN' && (
+                    <Link
+                      href="/admin"
+                      className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Paneli
+                    </Link>
+                  )}
+                  {user.rol === 'TEACHER' && (
+                    <Link
+                      href="/egitmen"
+                      className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Eğitmen Paneli
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left rounded-lg px-3 py-2 text-base font-medium text-destructive hover:bg-accent transition-colors flex items-center space-x-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Çıkış Yap</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/giris"
+                  className="block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Giriş Yap
+                </Link>
+              )}
             </nav>
           </div>
         </div>

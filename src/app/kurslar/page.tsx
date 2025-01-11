@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import CourseList from '../../components/courses/CourseList';
 import CourseFilters from '../../components/courses/CourseFilters';
+import { Filter, X } from 'lucide-react';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 interface Filters {
   search: string;
@@ -16,8 +19,9 @@ interface Filters {
 }
 
 export default function CoursesPage() {
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>({
-    search: '',
+    search: searchParams.get('q') || '',
     categories: [],
     levels: [],
     durations: [],
@@ -26,32 +30,59 @@ export default function CoursesPage() {
       max: ''
     }
   });
+  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    const searchQuery = searchParams.get('q');
+    if (searchQuery) {
+      setFilters(prev => ({
+        ...prev,
+        search: searchQuery
+      }));
+    }
+  }, [searchParams]);
 
   const handleFilterChange = (newFilters: Filters) => {
     setFilters(newFilters);
   };
 
+  const breadcrumbItems = [
+    {
+      label: "Kurslar"
+    }
+  ];
+
   return (
-    <main className="flex min-h-screen flex-col">
-      {/* Başlık */}
-      <div className="bg-accent/50 py-8">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col gap-4 text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold tracking-tight">
-              Matematik Kurslarımız
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Seviyenize ve hedeflerinize uygun kursları keşfedin
-            </p>
-          </div>
-        </div>
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Başlık Alanı */}
+      <div className="container mx-auto px-4 pt-8">
+        <Breadcrumb items={breadcrumbItems} title="Kurslar" />
       </div>
 
       {/* Ana İçerik */}
-      <div className="container px-4 md:px-6 py-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            {showFilters ? (
+              <>
+                <X className="w-4 h-4" />
+                Filtreleri Gizle
+              </>
+            ) : (
+              <>
+                <Filter className="w-4 h-4" />
+                Filtreleri Göster
+              </>
+            )}
+          </button>
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filtreler */}
-          <aside className="w-full lg:w-72">
+          <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-4 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto`}>
             <CourseFilters onFilterChange={handleFilterChange} />
           </aside>
 

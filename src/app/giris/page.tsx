@@ -4,19 +4,71 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    remember: false
+    remember: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Giriş işlemleri burada yapılacak
-    console.log(formData);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/auth/giris', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          sifre: formData.password
+        }),
+      });
+
+      // Önce yanıtın text olarak alınması
+      const text = await res.text();
+      
+      // Text'in JSON olarak parse edilmesi
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('API Yanıtı:', text);
+        throw new Error('Sunucudan geçersiz yanıt alındı');
+      }
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Giriş yapılırken bir hata oluştu');
+      }
+
+      // Token ve kullanıcı bilgilerini localStorage'a kaydet
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Kullanıcı değişikliği eventi
+      window.dispatchEvent(new Event('userChange'));
+      
+      // Giriş başarılı, returnUrl'e yönlendir
+      router.push(returnUrl);
+      
+    } catch (error: any) {
+      setError(error.message);
+      console.error('Giriş hatası:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,6 +110,12 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold mb-6">Giriş Yap</h1>
           
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                {error}
+              </div>
+            )}
+            
             {/* E-posta */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
@@ -70,6 +128,7 @@ export default function LoginPage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -86,11 +145,13 @@ export default function LoginPage() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full px-3 py-2 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={loading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -109,6 +170,7 @@ export default function LoginPage() {
                   checked={formData.remember}
                   onChange={(e) => setFormData({ ...formData, remember: e.target.checked })}
                   className="rounded border-gray-300 text-primary focus:ring-primary"
+                  disabled={loading}
                 />
                 <span>Beni hatırla</span>
               </label>
@@ -123,9 +185,10 @@ export default function LoginPage() {
             {/* Giriş Butonu */}
             <button
               type="submit"
-              className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              className="w-full py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              Giriş Yap
+              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </button>
 
             {/* Veya */}

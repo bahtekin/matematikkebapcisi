@@ -1,9 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
+  const pathname = usePathname();
+
+  // Admin sayfasında ise footer'ı gösterme
+  if (pathname?.includes('/admin')) {
+    return null;
+  }
+
   const quickLinks = [
     { name: 'Kurslar', href: '/kurslar' },
     { name: 'Eğitmenler', href: '/egitmenler' },
